@@ -1,0 +1,37 @@
+[
+    {
+        "FirstName":  "Sarah",
+        "LastName":  "Jenkins",
+        "Department":  "IT-Operations",
+        "JobTitle":  "Cloud Security Analyst",
+        "UserPrincipalName":  "sarah.jenkins@://onmicrosoft.com"
+    },
+    {
+        "FirstName":  "David",
+        "LastName":  "Ahmed",
+        "Department":  "Finance",
+        "JobTitle":  "Senior Accountant",
+        "UserPrincipalName":  "david.ahmed@://onmicrosoft.com"
+    },
+    {
+        "FirstName":  "Michelle",
+        "LastName":  "OConnor",
+        "Department":  "Human-Resources",
+        "JobTitle":  "HR Business Partner",
+        "UserPrincipalName":  "michelle.oconnor@://onmicrosoft.com"
+    },
+    {
+        "FirstName":  "James",
+        "LastName":  "Taylor",
+        "Department":  "IT-Operations",
+        "JobTitle":  "Junior Systems Engineer",
+        "UserPrincipalName":  "james.taylor@://onmicrosoft.com"
+    },
+    {
+        "FirstName":  "Elena",
+        "LastName":  "Russo",
+        "Department":  "Finance",
+        "JobTitle":  "Financial Analyst",
+        "UserPrincipalName":  "elena.russo@://onmicrosoft.com"
+    }
+]
