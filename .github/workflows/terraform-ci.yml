@@ -1,0 +1,38 @@
+name: "Identity-as-Code Security & Validation Pipeline"
+
+# Trigger this automated pipeline every time code is pushed to your repository
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  validate-and-scan:
+    name: "Audit Architecture & Permissions"
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Pull down the latest copy of your project files onto the automated server
+      - name: Checkout Code Base
+        uses: actions/checkout@v4
+
+      # 2. Setup the Terraform engine onto the testing machine
+      - name: Install Terraform Engine
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.0
+
+      # 3. Check for syntax bugs or broken logic loops
+      - name: Execute Terraform Code Validation
+        run: |
+          cd terraform
+          terraform init -backend=false
+          terraform validate
+
+      # 4. Automatically scan your IAM code for dangerous security exploits
+      - name: Scan Identity Permissions for Flaws (Trivy Security)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: "config"
+          hide-progress: true
+          exit-code: "0" # Keeps the run passing while flagging structural recommendations
