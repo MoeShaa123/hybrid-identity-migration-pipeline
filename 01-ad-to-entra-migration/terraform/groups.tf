@@ -1,34 +1,29 @@
-# 1. Dynamically read your generated local JSON dataset
+﻿# 1. Dynamically read your generated local JSON dataset
 locals {
   raw_data = jsondecode(file("${path.module}/../data/identities.json"))
   user_map = { for u in local.raw_data : u.UserPrincipalName => u }
 }
 
-# 2. Programmatically generate unique, compliant random passwords for each user
-resource "random_password" "user_passwords" {
-  for_each         = local.user_map
-  length           = 12 # Safely over your 10-character minimum
-  special          = false
-  upper            = true
-  numeric          = true
-  lower            = true
-  min_upper        = 1  # Guarantees at least 1 capital letter
-  min_numeric      = 1  # Guarantees at least 1 number
+# 2. Query your live Azure Cloud tenant to fetch your exact, verified onmicrosoft.com domain
+data "azuread_domains" "default" {
+  only_initial = true
 }
 
 # 3. Automate User Provisioning across the Entra ID Cloud Directory
 resource "azuread_user" "migrated_users" {
-  for_each            = local.user_map
-  user_principal_name = each.value.UserPrincipalName
+  for_each = local.user_map
+  
+  # Programmatically strip the old domain and inject your real, verified Azure tenant domain name
+  user_principal_name = "${split("@", each.value.UserPrincipalName)[0]}@${data.azuread_domains.default.domains[0].domain_name}"
+  
   display_name        = "${each.value.FirstName} ${each.value.LastName}"
   mail_nickname       = "${lower(each.value.FirstName)}.${lower(each.value.LastName)}"
   department          = each.value.Department
   job_title           = each.value.JobTitle
+  given_name          = each.value.FirstName  # Maps straight to Azure's First Name field
+  surname             = each.value.LastName   # Maps straight to Azure's Last Name field
   
-  # Passes the uniquely generated secure password string
-  password            = random_password.user_passwords[each.key].result
-  
-  # Forces the user to change it instantly upon their first sign-in screen
+  password            = "SecureNHSMigration2026!"
   force_password_change = true
 }
 

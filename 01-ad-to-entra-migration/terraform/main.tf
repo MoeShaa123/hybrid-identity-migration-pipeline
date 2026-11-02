@@ -4,11 +4,6 @@ terraform {
       source  = "hashicorp/azuread"
       version = "~> 2.53.0"
     }
-    random = {
-      source  = "hashicorp/random"
-      version = "~> 3.6.0"
-    }
-    # Add the core Azure Resource Manager provider here
     azurerm = {
       source  = "hashicorp/azurerm"
       version = "~> 3.90.0"
@@ -17,11 +12,8 @@ terraform {
 }
 
 provider "azuread" {}
-provider "random" {}
-
-# Initialize the Azure Resource Manager provider settings
 provider "azurerm" {
-  features {} # This features block is strictly required by HashiCorp for azurerm
+  features {}
 }
 
 data "azuread_client_config" "current" {}

@@ -1,0 +1,62 @@
+name: "Identity-as-Code Security & Validation Pipeline"
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    # 🕒 Cron schedule trigger: Runs automatically every Sunday at midnight (00:00 UTC)
+    - cron: "0 0 * * 0"
+
+jobs:
+  validate-and-scan:
+    name: "Audit Architecture & Permissions"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code Base
+        uses: actions/checkout@v4
+
+      - name: Install Terraform Engine
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.0
+
+      # Dynamic loop checking across all project workspaces
+      - name: Execute Terraform Code Validation
+        run: |
+          cd 01-ad-to-entra-migration/terraform
+          terraform init -backend=false
+          terraform validate
+
+          cd ../../02-azure-aws-sso-federation/terraform
+          terraform init -backend=false
+          terraform validate
+
+      - name: Scan Identity Permissions for Flaws (Trivy Security)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: "config"
+          hide-progress: true
+          exit-code: "0"
+
+  # =========================================================================
+  # NEW COMPLIANCE STAGE: WEEKLY ZERO-TRUST IDENTITY ACCESS REVIEW
+  # =========================================================================
+  live-threat-audit:
+    name: "Enforce Active Access Governance"
+    runs-on: windows-latest # Switches engine to Windows to execute native PowerShell natively
+    needs: validate-and-scan # Only runs if code validations pass cleanly
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Run Zero-Trust Compliance Scan
+        env:
+          # Securely injects your app credentials from GitHub encrypted secrets store
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+        run: |
+          powershell -File ./03-zero-trust-threat-audit/scripts/run_access_review.ps1
