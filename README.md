@@ -7,7 +7,7 @@ A production-grade, multi-cloud Identity-as-Code (IaC) repository. This portfoli
 ## 🏗️ Repository Architecture
 
 ```text
-moeshaa123-master-repo/
+hybrid-identity-migration-pipeline/
 ├── .github/                         # Centralised CI/CD Orchestration Hub
 │   └── workflows/
 │       └── identity-pipeline-ci-cd.yml # Multi-Stage Validation & Audit Workflow
