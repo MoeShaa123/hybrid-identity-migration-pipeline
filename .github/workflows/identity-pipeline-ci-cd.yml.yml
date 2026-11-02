@@ -40,9 +40,6 @@ jobs:
           hide-progress: true
           exit-code: "0"
 
-  # =========================================================================
-  # NEW COMPLIANCE STAGE: WEEKLY ZERO-TRUST IDENTITY ACCESS REVIEW
-  # =========================================================================
   live-threat-audit:
     name: "Enforce Active Access Governance"
     runs-on: windows-latest # Switches engine to Windows to execute native PowerShell natively
