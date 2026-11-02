@@ -56,4 +56,4 @@ jobs:
           AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
         run: |
-          powershell -File ./03-zero-trust-threat-audit/scripts/run_access_review.ps1
+          powershell -File ./03-zero-trust-compliance-auditor/scripts/run_access_review.ps1
