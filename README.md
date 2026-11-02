@@ -1,96 +1,87 @@
-# Multi-Cloud Identity Governance & Automation Pipeline (Mono-Repo)
+# Multi-Cloud Identity Automation & Security Pipeline (Mono-Repo)
 
-A production-grade, multi-cloud Identity-as-Code (IaC) repository. This portfolio demonstrates how to architect enterprise-level lifecycle management, cross-cloud trust federation, and real-time directory synchronization across **Microsoft Azure (Entra ID)** and **Amazon Web Services (AWS)** using **Terraform**, **PowerShell**, and **GitHub Actions**.
+This repository contains a working setup that manages user accounts, connects different cloud environments, and scans for security risks automatically. It uses **Terraform**, **PowerShell**, and **GitHub Actions** to automate user management across **Microsoft Entra ID (Azure)** and **Amazon Web Services (AWS)**.
 
 ---
 
-## 🏗️ Repository Architecture
+## 📂 Inside the Repository
 
 ```text
 hybrid-identity-migration-pipeline/
-├── .github/                         # Centralised CI/CD Orchestration Hub
+├── .github/                         # The automation folder
 │   └── workflows/
-│       └── identity-pipeline-ci-cd.yml # Multi-Stage Validation & Audit Workflow
-├── .gitignore                       # Credentials and local state masking filter
-├── README.md                        # Core Architecture Presentation
+│       └── identity-pipeline-ci-cd.yml # The script that runs the weekly security check
+├── .gitignore                       # Hides passwords/keys so they aren't uploaded
+├── README.md                        # This project guide
 │
-├── 01-ad-to-entra-migration/        # 🏆 Project 1: Automated Directory Migration
+├── 01-ad-to-entra-migration/        # 🏆 Stage 1: Moving users to the cloud
 │   ├── data/
-│   │   ├── legacy_users.csv         # Raw legacy on-premises datastore
-│   │   └── identities.json          # Sanitised pipeline interchange payload
+│   │   ├── legacy_users.csv         # The old list of company employees
+│   │   └── identities.json          # The cleaned up, machine-readable user list
 │   ├── scripts/
-│   │   └── parse_data.ps1           # .NET file stream conversion utility
+│   │   └── parse_data.ps1           # The script that fixes and converts the text list
 │   └── terraform/
-│       ├── main.tf                  # Engine requirements & client configuration
-│       └── groups.tf                # Dynamic identity resource schema loops
+│       └── groups.tf                # The code that actually creates the cloud accounts
 │
-├── 02-entra-to-aws-sso-federation/  # 🚀 Project 2: Multi-Cloud SAML 2.0 & SCIM Bridge
+├── 02-entra-to-aws-sso-federation/  # 🚀 Stage 2: Connecting Azure to AWS
 │   └── terraform/
-│       ├── main.tf                  # Multi-cloud provider definitions & AWS roles
-│       ├── entra_sso.tf             # Programmatic custom app role assignments
-│       └── entra_metadata.xml       # Cryptographic identity trust certificate
+│       ├── main.tf                  # The code that links the two clouds together
+│       ├── entra_sso.tf             # Automatically gives users access to the AWS login app
+│       └── entra_metadata.xml       # The security certificate shared between clouds
 │
-└── 03-zero-trust-compliance-auditor/# 🛡️ Project 3: Automated Threat Auditing Pipeline
+└── 03-zero-trust-compliance-auditor/# 🛡️ Stage 3: Checking for inactive accounts
     └── scripts/
-        └── run_access_review.ps1    # Graph API OAuth 2.0 governance scanner
+        └── run_access_review.ps1    # The script that logs in and looks for old users
 ```
 
 ---
 
 ## 🏆 Stage 1: Automated Hybrid Directory Migration Pipeline
 
-**Core Focus:** _Identity-as-Code (IaC), Data Sanitisation, Structural Resource Provisioning_
+### 🏢 Real-World Company Scenario
 
-### The Engineering Problem
+Imagine a company has 5,000 employees saved on an old, dusty on-premises corporate server. The business decides to move entirely to the cloud (Microsoft Entra ID). Doing this by hand means typing 5,000 names manually, which takes weeks and leads to human error, typos, and broken data formats.
 
-Enterprise environments migrating from legacy on-premises Active Directory networks face text anomalies, unhygienic data schemas, and high operational friction when lifting bulk user populations to pure cloud structures.
+### What I Built
 
-### What Was Engineered
-
-- **Advanced Data ETL Pipeline:** Wrote a robust PowerShell extraction script (`parse_data.ps1`) that imports raw CSV data, programmatically strips string formatting anomalies (such as Windows Byte Order Mark markers), and serializes the identities into standard JSON formats.
-- **Dynamic Identity Loops:** Configured native Terraform loops to process the JSON profiles, programmatically provisioning cloud objects with correct target properties (`given_name`, `surname`, `department`, `job_title`) via direct provider hooks into the **Microsoft Graph API**.
-- **Zero-Trust Baseline Enforcement:** Programmatically appended immediate `force_password_change = true` mandates on all migrated accounts, neutralizing the risk of stagnant, default admin credentials.
+- **The Cleaner Script:** I wrote a PowerShell script (`parse_data.ps1`) that takes the raw user spreadsheet, strips out invisible text errors, fixes punctuation marks, and changes the data into a clean JSON file that automation engines can read.
+- **The Account Creator:** I wrote Terraform code that reads that clean text file and programmatically creates every user account, populates their first name, last name, and department, and drops them into the correct company security groups.
+- **First-Day Security:** The code automatically flags every new user with a setting that forces them to pick a brand-new, private password the very first second they log in. This prevents default passwords from leaking.
 
 ---
 
 ## 🚀 Stage 2: Multi-Cloud SAML 2.0 Federation & Real-Time SCIM Bridge
 
-**Core Focus:** _SAML 2.0 Handshakes, SCIM API Operations, Cross-Cloud Access Delegation_
+### 🏢 Real-World Company Scenario
 
-### The Engineering Problem
+Your company uses Microsoft Azure for daily employee operations (emails, Excel, laptops), but the engineering teams use AWS to build customer web applications. Employees are frustrated because they have to remember two different usernames and two separate passwords. Worse, when an employee leaves the company, HR deletes them from Azure, but the IT team forgets to delete them from AWS—leaving a massive security backdoor open.
 
-Siloed login environments cause password fatigue, expand corporate threat attack surfaces, and create administrative gaps during critical user offboarding events (Leavers).
+### What I Built
 
-### What Was Engineered
-
-- **Cryptographic Trust Foundation:** Established an immutable SAML 2.0 identity federation trust link between Microsoft Entra ID and **AWS IAM Identity Center** over secure London (`eu-west-2`) endpoints by importing portal metadata into Terraform.
-- **Automated Identity Access Mappings:** Engineered programmatic User-to-Application role maps inside Terraform (`azuread_app_role_assignment`), completely bypassing free-tier Azure group-assignment limitations via clean code loops.
-- **Real-Time SCIM Synchronization Engine:** Enabled a System for Cross-domain Identity Management (SCIM) pipe over a dedicated **IPv4 network endpoint**, utilizing OAuth 2.0 Secret Bearer tokens to seamlessly synchronize account lifecycles and states from Azure to AWS.
-- **Cross-Cloud Permissions Bridge:** Configured short-lived, ephemeral AWS assume-role bindings (`AzureFederatedAdminRole`), enabling enterprise users to authenticate securely using their Azure workspace passwords to instantly inherit scoped permissions inside AWS.
+- **The Login Bridge (SSO):** I used Terraform to exchange secure digital certificates between Azure and AWS. Now, employees browse to an AWS page, click login, and are redirected to type their standard Azure password. One password, two clouds.
+- **The Automated Guest List (SCIM):** I set up an automated background sync engine. The moment a new user is added or updated in Azure, Azure calls an API in AWS in the background and instantly duplicates that user account into AWS. If an account is disabled in Azure, their access to AWS is cut off automatically.
+- **Free-Tier License Fix:** Since the free version of Azure blocks groups from being assigned to applications, I wrote a code loop in Terraform (`azuread_app_role_assignment`) that assigns every single user to the login portal individually, getting the exact same result for free.
 
 ---
 
 ## 🛡️ Stage 3: Automated Zero-Trust Threat Auditing Pipeline
 
-**Core Focus:** _SecOps Automation, API Security, Token Authentication, Governance & Compliance_
+### 🏢 Real-World Company Scenario
 
-### The Engineering Problem
+Employees join and leave companies constantly. Over time, contractor accounts are forgotten, old employee accounts are left active, and stale profiles sit abandoned. These inactive accounts are prime targets for hackers because nobody is watching them.
 
-Unmonitored cloud environments suffer from "Identity Drift" and "Privilege Creep," where stale, inactive employee accounts remain open indefinitely, presenting massive targets for external threat actors.
+### What I Built
 
-### What Was Engineered
-
-- **OAuth 2.0 Compliance Integration:** Configured an identity audit engine that authenticates securely using App Registrations and scoped OAuth 2.0 client credentials (`User.ReadWrite.All`) to interface with the Microsoft Graph core engine.
-- **Automated Threat Assessment Scripting:** Coded a programmatic compliance utility (`run_access_review.ps1`) that performs a deep scan of the cloud directory to flag any accounts that have remained inactive or have not logged in for **over 90 days**.
-- **Privilege Demotion Remediation:** Programmed the engine to instantly execute automated cleanup steps, systematically stripping high-level group privileges and revoking active entitlements from stale accounts to enforce absolute **Least-Privilege Compliance**.
-- **GitHub Actions CI/CD Scheduler:** Embedded the security engine inside a managed GitHub Actions runner file (`identity-pipeline-ci-cd.yml`), executing the compliance scans on a weekly automated schedule.
+- **The Autonomous Auditor:** I wrote a security script (`run_access_review.ps1`) that doesn't need a human to type a password to log in. Instead, it logs in as a secure background automation service using an OAuth 2.0 security token.
+- **The 90-Day Tracker:** Every time it runs, the script scans the login history of every account in the entire company directory. It isolates any user who hasn't logged in for over 90 days (or has never logged in at all) and flags them in bold red as a security risk.
+- **The Weekly Clockwork Scheduler:** I embedded this script inside a GitHub Actions file (`identity-pipeline-ci-cd.yml`). It is set up on a timer to wake up automatically every Sunday at midnight, run the audit, and log the compliance report cleanly on the screen.
 
 ---
 
-## 💻 Tech Stack & Protocols Managed
+## 💻 Systems & Tools Used
 
-- **Infrastructure as Code:** Terraform (HashiCorp AWS and AzureAD engine providers)
-- **Identity Management Providers:** Microsoft Entra ID (Azure Active Directory), AWS IAM Identity Center (SSO)
-- **Automation & Core Scripting:** PowerShell Core (Advanced Graph API modules, native .NET file IO)
-- **Security & Authentication Protocols:** SAML 2.0, SCIM, OAuth 2.0, OpenID Connect (OIDC), Cryptographic Certificates
-- **CI/CD & Process Orchestration:** GitHub Actions Workflow Engines, Git Version Control
+- **Infrastructure Management:** Terraform
+- **Cloud Security Platforms:** Microsoft Entra ID (Azure AD), AWS IAM Identity Center
+- **Scripting Languages:** PowerShell Core, .NET Web Extensions
+- **Security Protocols:** SAML 2.0 Certificates, SCIM User Syncing, OAuth 2.0 API Tokens
+- **Automation Servers:** GitHub Actions
