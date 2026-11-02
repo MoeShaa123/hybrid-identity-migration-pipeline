@@ -29,7 +29,7 @@ jobs:
           terraform init -backend=false
           terraform validate
 
-          cd ../../02-azure-aws-sso-federation/terraform
+          cd ../../02-entra-to-aws-sso-federation/terraform
           terraform init -backend=false
           terraform validate
 
